@@ -1,0 +1,68 @@
+/* src/components/ItemListForm.css */
+
+.item-list-form {
+    background: var(--c-bg); /* Use your defined variable */
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    padding: var(--s-lg);
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.item-list-form h2 {
+    margin-bottom: var(--s-md);
+    color: var(--c-heading);
+    text-align: center;
+    font-size: var(--f-lg);
+}
+
+.item-list-form form {
+    display: flex;
+    flex-direction: column;
+}
+
+.item-list-form .form-group {
+    margin-bottom: var(--s-md);
+}
+
+.item-list-form label {
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.item-list-form input {
+    width: 100%;
+    padding: 0.5rem;
+    font-size: 14px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.item-list-form button {
+    padding: 0.5rem 1rem;
+    font-size: 14px;
+    border: none;
+    border-radius: 4px;
+    color: #fff;
+    background-color: #007bff;
+    cursor: pointer;
+    margin-top: 1rem;
+    transition: background-color 0.3s ease;
+}
+
+.item-list-form button:hover {
+    background-color: #0056b3;
+}
+
+.item-list-form .cancel-button {
+    background-color: #6c757d;
+}
+
+.item-list-form .cancel-button:hover {
+    background-color: #5a6268;
+}
+
+.required {
+    color: red;
+    margin-left: 5px;
+}

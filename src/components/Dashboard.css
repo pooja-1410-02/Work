@@ -1,0 +1,80 @@
+/* src/components/FilterChart.css */
+
+/* Filter container */
+.filter-container {
+    margin: var(--s-md) 0;
+    padding: var(--s-md);
+    background-color: var(--c-light); /* Updated to be consistent with light backgrounds */
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    display: flex;
+    flex-direction: column;
+}
+
+/* Filter section with menuItemSpace styling */
+.filter {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s-md);
+}
+
+/* Individual filter elements */
+.filter div {
+    padding: var(--s-sm) var(--s-md); /* Adjusted padding for consistency */
+    margin: 0 -1rem; /* Margin might need to be reviewed based on actual layout */
+    overflow: visible;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    flex: 1;
+}
+
+/* Label styles */
+.filter label {
+    margin-bottom: var(--s-xs); /* Consistent spacing */
+    font-weight: bold;
+    color: var(--c-text-dark); /* Updated to match dark text color */
+    font-size: var(--f-md);
+}
+
+/* Select box styles */
+.filter select {
+    padding: var(--s-xs);
+    font-size: var(--f-md);
+    border: 1px solid var(--c-border-light); /* Updated to match border color */
+    border-radius: var(--border-radius);
+    width: 100%;
+    max-width: 200px;
+    transition: border-color 0.3s ease;
+}
+
+.filter select:focus {
+    border-color: var(--c-primary); /* Updated to match primary color for focus */
+    outline: none;
+    box-shadow: 0 0 3px rgba(0, 123, 255, 0.5); /* Updated to match primary color */
+}
+
+/* Chart row styles */
+.chart-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s-lg);
+    margin-bottom: var(--s-lg);
+}
+
+/* Chart container styles */
+.chart-container {
+    flex: 1 1 calc(50% - var(--s-md)); /* Adjusted for consistent spacing */
+    max-width: 100%;
+    box-sizing: border-box;
+    padding: var(--s-md);
+    background-color: var(--c-light); /* Updated to match light background */
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+}
+
+/* Chart styles */
+.chart {
+    width: 100%;
+    height: 300px; /* Consistent height, might need adjustments based on actual content */
+}

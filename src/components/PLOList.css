@@ -1,0 +1,144 @@
+/* src/components/PLOList.css */
+
+:root {
+    --c-primary: #007bff; /* Primary color */
+    --c-primary-hover: #0056b3; /* Primary color hover */
+    --c-success: #28a745; /* Success color */
+    --c-success-hover: #218838; /* Success hover color */
+    --c-danger: #dc3545; /* Danger color */
+    --c-danger-hover: #c82333; /* Danger hover color */
+    --c-light: #f4f4f4; /* Light background */
+    --c-light-hover: #f1f1f1; /* Light hover background */
+    --c-border-light: #ddd; /* Light border color */
+    --c-text-dark: #333; /* Dark text color */
+    --c-text-light: #fff; /* Light text color */
+    --c-bg-light: #eaecee; /* Light row background */
+    --c-bg-hover: #f5f6f7; /* Hover background for rows */
+    --s-xs: 0.25rem; /* Extra small spacing */
+    --s-sm: 0.5rem; /* Small spacing */
+    --s-md: 0.75rem; /* Medium spacing */
+    --s-lg: 1rem; /* Large spacing */
+    --s-xl: 2rem; /* Extra large spacing */
+    --border-radius: 4px; /* Border radius */
+    --box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Box shadow */
+    --f-sm: 0.75rem; /* Small font size */
+    --f-md: 1rem; /* Medium font size */
+    --f-lg: 1.5rem; /* Large font size */
+}
+
+/* Container for PLO list */
+.plo-list {
+    padding: var(--s-lg);
+}
+
+/* Heading styling */
+.plo-list h2 {
+    font-size: var(--f-lg);
+    color: var(--c-text-dark);
+    margin-bottom: var(--s-lg);
+}
+
+/* Styling the form */
+.plo-form {
+    margin-bottom: var(--s-lg);
+    display: flex;
+    gap: var(--s-sm);
+}
+
+.plo-form input {
+    padding: var(--s-sm);
+    font-size: var(--f-sm);
+    border: 1px solid var(--c-border-light);
+    border-radius: var(--border-radius);
+    width: 200px; /* Adjust width as needed */
+}
+
+.plo-form button {
+    padding: var(--s-sm) var(--s-md);
+    font-size: var(--f-sm);
+    border: none;
+    border-radius: var(--border-radius);
+    color: var(--c-text-light);
+    background-color: var(--c-primary);
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.plo-form button:hover {
+    background-color: var(--c-primary-hover);
+}
+
+/* Styling the table */
+.plo-list table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: var(--s-md);
+    font-size: var(--f-sm); /* Match font size */
+}
+
+.plo-list th,
+.plo-list td {
+    padding: var(--s-md); /* Consistent padding */
+    text-align: left;
+    border-bottom: 1px solid var(--c-border-light);
+    word-wrap: break-word; /* Ensure word wrapping */
+}
+
+.plo-list th {
+    background-color: var(--c-light); /* Consistent background color */
+    color: var(--c-text-dark); /* Consistent text color */
+    font-weight: bold;
+}
+
+.plo-list tr:nth-child(even) {
+    background-color: var(--c-bg-light); /* Consistent even row color */
+}
+
+.plo-list tr:hover {
+    background-color: var(--c-bg-hover); /* Consistent hover color */
+}
+
+/* Styling the action buttons */
+.plo-list button {
+    padding: var(--s-sm) var(--s-md);
+    font-size: var(--f-sm);
+    border: none;
+    border-radius: var(--border-radius);
+    color: var(--c-text-light);
+    background-color: var(--c-success);
+    cursor: pointer;
+    margin-right: var(--s-sm);
+    transition: background-color 0.3s ease;
+}
+
+.plo-list button:hover {
+    background-color: var(--c-success-hover);
+}
+
+/* Styling the delete button */
+.plo-list button.delete {
+    background-color: var(--c-danger);
+}
+
+.plo-list button.delete:hover {
+    background-color: var(--c-danger-hover);
+}
+
+/* Styling the actions column in PLOList */
+.plo-list .actions-column {
+    width: 120px; /* Adjust the width as needed */
+    text-align: center; /* Center-align buttons for consistency */
+}
+
+.plo-list .actions-column button {
+    font-size: 0.7rem; /* Smaller font size */
+    padding: 0.25rem 0.5rem; /* Reduced padding */
+    margin: 0.2rem; /* Slight margin to space out buttons */
+}
+
+/* Optional: Adjust specific button sizes within actions column */
+.plo-list button.edit,
+.plo-list button.delete {
+    font-size: 0.7rem; /* Smaller font size */
+    padding: 0.25rem 0.5rem; /* Reduced padding */
+}

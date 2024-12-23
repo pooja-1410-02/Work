@@ -1,0 +1,179 @@
+.item-list {
+    background: var(--c-text-light);
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    padding: var(--s-lg);
+    margin: var(--s-lg) auto;
+    max-width: 1200px;
+    overflow-x: auto;
+}
+
+.item-list h2 {
+    margin-bottom: var(--s-md);
+    color: var(--c-heading);
+    text-align: left;
+    font-size: var(--f-lg);
+}
+
+/* Styling the form */
+.item-form {
+    margin-bottom: var(--s-md);
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s-sm);
+    justify-content: center;
+}
+
+.item-form input,
+.item-form select,
+.item-form textarea {
+    padding: var(--s-sm);
+    font-size: var(--f-sm);
+    border: 1px solid var(--c-border-light);
+    border-radius: var(--border-radius);
+    width: 200px;
+}
+
+.item-form button {
+    padding: var(--s-sm) var(--s-md);
+    font-size: var(--f-sm);
+    border: none;
+    border-radius: var(--border-radius);
+    color: var(--c-text-light);
+    background-color: var(--c-success);
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.item-form button:hover {
+    background-color: var(--c-success-hover);
+}
+
+/* Styling the table */
+.item-list table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: var(--s-md);
+    font-size: var(--f-sm);
+}
+
+.item-list th,
+.item-list td {
+    padding: var(--s-md);
+    text-align: left;
+    border-bottom: 1px solid var(--c-border-light);
+    word-wrap: break-word;
+}
+
+.item-list th {
+    background-color: var(--c-brighter);
+    color: var(--c-text-dark);
+}
+
+/* Ensure no overriding styles for table rows */
+table tr {
+    background: transparent; /* Reset any background */
+}
+
+/* Status row colors */
+.item-list table tr.row-green {
+    background-color: #3CB371; /* Medium Sea Green */
+    color: white;
+}
+
+.item-list table tr.row-orange {
+    background-color: #F5761A; /* Pumpkin */
+    color: white;
+}
+
+.item-list table tr.row-red {
+    background-color: #FF6347; /* Tomato */
+    color: white;
+}
+
+/* Styling the action buttons */
+.item-list button {
+    padding: var(--s-sm) var(--s-md);
+    font-size: 12px;
+    border: none;
+    border-radius: var(--border-radius);
+    color: var(--c-text-light);
+    background-color: var(--c-success);
+    cursor: pointer;
+    margin-right: var(--s-sm);
+    transition: background-color 0.3s ease;
+}
+
+.item-list button:hover {
+    background-color: var(--c-success-hover);
+}
+
+/* Styling the delete button */
+.item-list button.delete {
+    background-color: var(--c-danger); /* Adjust as needed */
+}
+
+.item-list button.delete:hover {
+    background-color: var(--c-danger-hover); /* Adjust as needed */
+}
+
+/* Updated Tabs Styles */
+.tabs {
+    display: flex;
+    margin-bottom: 1rem;
+}
+
+.tabs button {
+    background: var(--c-bright);
+    border: 1px solid var(--c-medium);
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    font-size: var(--f-sm);
+    color: var(--c-text);
+    border-radius: var(--border-radius);
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.tabs button.active {
+    background: var(--c-brand-green);
+    color: var(--c-brightest);
+    border-bottom: 1px solid transparent;
+}
+
+.tabs button:hover {
+    background: var(--c-hilite-pale);
+}
+
+/* Styling the context menu */
+.context-menu {
+    position: absolute;
+    background: var(--c-brightest);
+    border: 1px solid var(--c-border-light);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    padding: var(--s-sm);
+    border-radius: var(--border-radius);
+    min-width: 150px;
+}
+
+.context-menu button {
+    display: block;
+    width: 100%;
+    padding: var(--s-sm);
+    border: none;
+    background: none;
+    cursor: pointer;
+    text-align: left;
+    font-size: var(--f-sm);
+    color: var(--c-text-primary);
+    transition: background 0.2s ease;
+}
+
+.context-menu button:hover {
+    background: var(--c-bg-hover);
+}
+
+.context-menu button:focus {
+    outline: 2px solid var(--c-focus-outline);
+    outline-offset: 2px;
+}

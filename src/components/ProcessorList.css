@@ -1,0 +1,144 @@
+/* src/components/ProcessorList.css */
+
+:root {
+    --c-primary: #007bff; /* Primary color */
+    --c-primary-hover: #0056b3; /* Primary color hover */
+    --c-success: #28a745; /* Success color */
+    --c-success-hover: #218838; /* Success hover color */
+    --c-danger: #dc3545; /* Danger color */
+    --c-danger-hover: #c82333; /* Danger hover color */
+    --c-light: #f4f4f4; /* Light background */
+    --c-light-hover: #f1f1f1; /* Light hover background */
+    --c-border-light: #ddd; /* Light border color */
+    --c-text-dark: #333; /* Dark text color */
+    --c-text-light: #fff; /* Light text color */
+    --c-bg-light: #eaecee; /* Light row background */
+    --c-bg-hover: #f5f6f7; /* Hover background for rows */
+    --s-xs: 0.25rem; /* Extra small spacing */
+    --s-sm: 0.5rem; /* Small spacing */
+    --s-md: 0.75rem; /* Medium spacing */
+    --s-lg: 1rem; /* Large spacing */
+    --s-xl: 2rem; /* Extra large spacing */
+    --border-radius: 4px; /* Border radius */
+    --box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Box shadow */
+    --f-sm: 0.75rem; /* Small font size */
+    --f-md: 1rem; /* Medium font size */
+    --f-lg: 1.5rem; /* Large font size */
+}
+
+/* Container for Processor list */
+.processor-list {
+    padding: var(--s-lg);
+}
+
+/* Heading styling */
+.processor-list h2 {
+    font-size: var(--f-lg);
+    color: var(--c-text-dark);
+    margin-bottom: var(--s-lg);
+}
+
+/* Styling the form */
+.processor-form {
+    margin-bottom: var(--s-lg);
+    display: flex;
+    gap: var(--s-sm);
+}
+
+.processor-form input {
+    padding: var(--s-sm);
+    font-size: var(--f-sm);
+    border: 1px solid var(--c-border-light);
+    border-radius: var(--border-radius);
+    width: 200px; /* Adjust width as needed */
+}
+
+.processor-form button {
+    padding: var(--s-sm) var(--s-md);
+    font-size: var(--f-sm);
+    border: none;
+    border-radius: var(--border-radius);
+    color: var(--c-text-light);
+    background-color: var(--c-primary);
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.processor-form button:hover {
+    background-color: var(--c-primary-hover);
+}
+
+/* Styling the table */
+.processor-list table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: var(--s-md);
+    font-size: var(--f-sm); /* Match font size */
+}
+
+.processor-list th,
+.processor-list td {
+    padding: var(--s-md); /* Consistent padding */
+    text-align: left;
+    border-bottom: 1px solid var(--c-border-light);
+    word-wrap: break-word; /* Ensure word wrapping */
+}
+
+.processor-list th {
+    background-color: var(--c-light); /* Consistent background color */
+    color: var(--c-text-dark); /* Consistent text color */
+    font-weight: bold;
+}
+
+.processor-list tr:nth-child(even) {
+    background-color: var(--c-bg-light); /* Consistent even row color */
+}
+
+.processor-list tr:hover {
+    background-color: var(--c-bg-hover); /* Consistent hover color */
+}
+
+/* Styling the action buttons */
+.processor-list button {
+    padding: var(--s-sm) var(--s-md);
+    font-size: var(--f-sm);
+    border: none;
+    border-radius: var(--border-radius);
+    color: var(--c-text-light);
+    background-color: var(--c-success);
+    cursor: pointer;
+    margin-right: var(--s-sm);
+    transition: background-color 0.3s ease;
+}
+
+.processor-list button:hover {
+    background-color: var(--c-success-hover);
+}
+
+/* Styling the delete button */
+.processor-list button.delete {
+    background-color: var(--c-danger);
+}
+
+.processor-list button.delete:hover {
+    background-color: var(--c-danger-hover);
+}
+
+/* Styling the actions column in ProcessorList */
+.processor-list .actions-column {
+    width: 120px; /* Adjust the width as needed */
+    text-align: center; /* Center-align buttons for consistency */
+}
+
+.processor-list .actions-column button {
+    font-size: 0.7rem; /* Smaller font size */
+    padding: 0.25rem 0.5rem; /* Reduced padding */
+    margin: 0.2rem; /* Slight margin to space out buttons */
+}
+
+/* Optional: Adjust specific button sizes within actions column */
+.processor-list button.edit,
+.processor-list button.delete {
+    font-size: 0.7rem; /* Smaller font size */
+    padding: 0.25rem 0.5rem; /* Reduced padding */
+}

@@ -1,0 +1,149 @@
+.forecast {
+    background: var(--c-text-light);
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    padding: var(--s-lg);
+    margin: var(--s-lg) auto;
+    max-width: 1200px;
+    overflow-x: auto;
+}
+
+.forecast h2 {
+    margin-bottom: var(--s-md);
+    color: var(--c-heading);
+    text-align: left;
+    font-size: var(--f-lg);
+}
+
+/* Styling the form */
+.forecast-form {
+    margin-bottom: var(--s-md);
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s-sm);
+    justify-content: center;
+}
+
+.forecast-form input,
+.forecast-form select,
+.forecast-form textarea {
+    padding: var(--s-sm);
+    font-size: var(--f-sm);
+    border: 1px solid var(--c-border-light);
+    border-radius: var(--border-radius);
+    width: 200px;
+}
+
+.forecast-form button {
+    padding: var(--s-sm) var(--s-md);
+    font-size: var(--f-sm);
+    border: none;
+    border-radius: var(--border-radius);
+    color: var(--c-text-light);
+    background-color: var(--c-success);
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.forecast-form button:hover {
+    background-color: var(--c-success-hover);
+}
+
+/* Styling the table */
+.forecast table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: var(--s-md);
+    font-size: var(--f-sm);
+}
+
+.forecast th,
+.forecast td {
+    padding: var(--s-md);
+    text-align: left;
+    border-bottom: 1px solid var(--c-border-light);
+    word-wrap: break-word;
+}
+
+.forecast th {
+    background-color: var(--c-brighter);
+    color: var(--c-text-dark);
+}
+
+/* Status row colors */
+.row-green {
+    background-color: #3CB371; /* Medium Sea Green */
+    color: white;
+}
+
+.row-orange {
+    background-color: #F5761A; /* Pumpkin */
+    color: white;
+}
+
+/* Styling the actions buttons */
+.forecast button {
+    padding: var(--s-sm) var(--s-md);
+    font-size: 12px;
+    border: none;
+    border-radius: var(--border-radius);
+    color: var(--c-text-light);
+    background-color: var(--c-success);
+    cursor: pointer;
+    margin-right: var(--s-sm);
+    transition: background-color 0.3s ease;
+}
+
+.forecast button:hover {
+    background-color: var(--c-success-hover);
+}
+
+/* Styling the delete button */
+.forecast button.delete {
+    background-color: var(--c-danger);
+}
+
+.forecast button.delete:hover {
+    background-color: var(--c-danger-hover);
+}
+
+/* Required field styling */
+.required {
+    color: red;
+    margin-left: 5px;
+}
+
+/* Details section styling */
+.details {
+    padding: var(--s-md);
+    background-color: var(--c-brighter-light);
+    border-radius: var(--border-radius);
+    margin-top: var(--s-sm);
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center; /* Center vertically */
+    justify-content: flex-start; /* Align details to the left */
+    font-size: var(--f-sm); /* Consistent font size */
+}
+
+/* Individual detail styling */
+.details > div {
+    margin-right: var(--s-md); /* Space between details */
+}
+
+/* Label styling for details */
+.details strong {
+    margin-right: 4px; /* Space between label and value */
+}
+
+/* Arrow and SID row styling */
+.forecast table td.sid {
+    cursor: pointer;
+    display: flex;
+    align-items: center; /* Center items vertically */
+}
+
+.forecast table td.sid span {
+    margin-left: 8px; /* Space for the arrow */
+}

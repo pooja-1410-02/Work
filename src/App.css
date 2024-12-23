@@ -1,38 +1,305 @@
-.App {
+:root {
+  --c-brand-blue: #008fd3;
+  --c-brand-green: #4fb81c;
+  --c-brand-gold: #f0ab00;
+  --c-brand-orange: #e35500;
+  --c-brand-purple: #970a82;
+  --c-darkest: #1a2733;
+  --c-darker: #354a5f;
+  --c-dark: #5b738b;
+  --c-medium: #a9b4be;
+  --c-bright: #eaecee;
+  --c-brighter: #f5f6f7;
+  --c-brightest: #fff;
+  --c-hilite-darker: #0057d2;
+  --c-hilite: #0070f2;
+  --c-hilite-lighter: #1b90ff;
+  --c-hilite-pale: #ccedff;
+  --c-hilite-paler: #dcf3ff;
+  --c-hilite-palest: #f0faff;
+  --c-focus: #0070f2;
+  --c-focus-negative: rgba(153, 198, 250, .65);
+  --c-focus-danger: hsla(0, 85%, 79%, .75);
+  --c-focus-success: rgba(155, 210, 142, .75);
+  --c-text: var(--c-darkest);
+  --c-text-secondary: var(--c-darker);
+  --c-text-tertiary: var(--c-dark);
+  --c-text-disabled: rgba(var(--c-darkest), 0.67);
+  --c-link: var(--c-hilite-darker);
+  --c-link-hover: var(--c-hilite-lighter);
+  --s-xs: 0.25rem;
+  --s-scrollbar-md: 15px;
+  --f-md: 1rem;
+  --f-lg: 1.25rem;
+  --f-sm: 0.875rem;
+  --s-md: 1rem;
+  --s-lg: 1.5rem;
+  --border-radius: 4px;
+  --box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Ensure the body and html take up the full height and remove default margin */
+html, body {
+  height: 100%;
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Flex container to ensure the footer is pushed to the bottom */
+.app-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* The main content area should take up the available space */
+.main-content {
+  flex: 1;
+  padding: var(--s-md);
+}
+
+/* Header styles */
+.app-header {
+  background-color: var(--c-darkest);
+  color: var(--c-brightest);
+  padding: var(--s-md);
+  text-align: center;
+  background-image: linear-gradient(to bottom right, transparent 50%, var(--c-brand-blue) 125%);
+  border-bottom: solid var(--s-xs) var(--c-brand-blue);
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  height: 4rem;
+  align-items: center;
+}
+
+/* Branding logo */
+.branding__logo {
+  height: 50px; /* Adjusted height */
+  margin-right: 15px;
+}
+
+/* Navigation bar styles */
+.app-nav {
+  display: flex;
+  align-items: center;
+  background-color: var(--c-brighter);
+  padding: var(--s-xs);
+  border-bottom: solid var(--s-xs) var(--c-dark);
+}
+
+.nav-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex: 1; /* Allows nav-list to take up remaining space */
+}
+
+.nav-item {
+  margin: 0 var(--s-md);
+}
+
+.nav-link {
+  text-decoration: none;
+  color: var(--c-brand-blue);
+  font-size: var(--f-lg);
+  font-weight: bold;
+}
+
+.nav-link:hover {
+  text-decoration: underline;
+}
+
+.nav-actions {
+  display: flex;
+  align-items: center;
+}
+
+.logout-btn {
+  background-color: var(--c-brand-blue);
+  color: #fff;
+  border: none;
+  padding: 0.25rem 0.5rem; /* Reduced size */
+  cursor: pointer;
+  font-size: 0.875rem; /* Smaller font size */
+  margin-right: 10px;
+}
+
+.logout-btn:hover {
+  background-color: #dac4c4;
+}
+
+.user-icon {
+  display: flex;
+  align-items: center;
+}
+
+.user-icon img {
+  width: 30px; /* Adjust width to fit the tab */
+  height: 30px; /* Maintain aspect ratio */
+  border-radius: 50%;
+}
+
+/* Footer styles */
+.app-footer {
+  background-color: var(--c-brighter);
+  padding: var(--s-xs);
+  text-align: center;
+  color: var(--c-text);
+}
+
+/* Custom scrollbar styles */
+[styled-scrollbars] ::-webkit-scrollbar {
+  width: var(--s-scrollbar-md) !important;
+}
+
+[styled-scrollbars] ::-webkit-scrollbar-thumb {
+  background-color: rgba(var(--c-darkest), 0.25) !important;
+  border-radius: calc(var(--s-scrollbar-md) / 2);
+}
+
+[styled-scrollbars] ::-webkit-scrollbar-track {
+  background-color: transparent !important;
+}
+
+::selection {
+  background-color: var(--c-hilite-pale);
+}
+
+/* Box for authentication forms */
+.auth-box {
+  background-color: var(--c-brighter);
+  border: 1px solid var(--c-darker);
+  border-radius: var(--border-radius);
+  padding: 2rem;
+  box-shadow: var(--box-shadow);
+  max-width: 360px;
+  margin: 0 auto;
   text-align: center;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+/* Form styles */
+.auth-form {
   display: flex;
   flex-direction: column;
+}
+
+.auth-form input {
+  margin-bottom: var(--s-md);
+  padding: 0.75rem;
+  border: 1px solid var(--c-medium);
+  border-radius: var(--border-radius);
+  font-size: var(--f-md);
+}
+
+.auth-form button {
+  padding: 0.75rem;
+  border: none;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  font-size: var(--f-md);
+  transition: background-color 0.3s ease;
+}
+
+.auth-form button:hover {
+  background-color: var(--c-hilite-lighter);
+}
+
+/* Specific button styles */
+.register-btn,
+.logout-btn {
+  font-size: var(--f-md);
+  padding: 0.75rem;
+  margin: 0.5rem auto;
+}
+
+.register-btn {
+  background-color: var(--c-brand-green);
+}
+
+.register-btn:hover {
+  background-color: var(--c-hilite-pale);
+}
+
+.logout-btn {
+  background-color: var(--c-brand-blue);
+  color: #fff;
+  border: none;
+  padding: 0.25rem 0.5rem; /* Reduced size */
+  cursor: pointer;
+  font-size: 0.875rem; /* Smaller font size */
+}
+
+.logout-btn:hover {
+  background-color: #dac4c4;
+}
+
+/* Toggle button styles */
+.toggle-btn {
+  font-size: var(--f-md);
+  padding: 1rem;
+  border: none;
+  background-color: var(--c-hilite);
+  color: var(--c-brightest);
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.toggle-btn:hover {
+  background-color: var(--c-hilite-lighter);
+}
+
+/* Success and error messages */
+.success-message {
+  color: var(--c-brand-green);
+  font-size: var(--f-md);
+  margin: var(--s-md) 0;
+}
+
+.error-message {
+  color: var(--c-focus-danger);
+  font-size: var(--f-md);
+  margin: var(--s-md) 0;
+}
+.user-icon {
+  position: relative;
+  display: flex;
   align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  cursor: pointer;
 }
 
-.App-link {
-  color: #61dafb;
+.dropdown-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background-color: white;
+  border: 1px solid #ddd;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+  border-radius: 4px;
+  width: 200px;
+  z-index: 1000;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  cursor: pointer;
+}
+
+.dropdown-item img {
+  width: 20px;
+  height: 20px;
+  margin-right: 10px;
+}
+
+.dropdown-item:hover {
+  background-color: #f5f5f5;
+}
+.header-time {
+  font-size: 16px;
+  margin-left: auto; /* Align to the right */
+  padding: 10px;
+  color: #f5f5f5; /* Adjust color as needed */
 }

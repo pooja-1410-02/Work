@@ -1,0 +1,54 @@
+.user-avatar-container {
+    display: flex;
+    align-items: center;
+    background-color: #f0f0f0;
+    border-radius: 8px;
+    padding: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .avatar-wrapper {
+    margin-right: 12px;
+  }
+  
+  .user-avatar-image {
+    width: 50px; /* Adjust size as needed */
+    height: 50px; /* Adjust size as needed */
+    border-radius: 50%;
+    border: 2px solid #ddd;
+  }
+  
+  .user-info {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .username {
+    font-weight: bold;
+    margin-bottom: 4px;
+  }
+  
+  .profile-link {
+    color: #007bff;
+    text-decoration: none;
+    margin-bottom: 8px;
+  }
+  
+  .profile-link:hover {
+    text-decoration: underline;
+  }
+  
+  .logout-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    display: flex;
+    align-items: center;
+  }
+  
+  .logout-icon {
+    width: 24px; /* Adjust size as needed */
+    height: 24px; /* Adjust size as needed */
+  }
+  
