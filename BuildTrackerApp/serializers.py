@@ -63,37 +63,35 @@ class ItemSerializer(serializers.ModelSerializer):
 from django.shortcuts import get_object_or_404
 
 class ForecastSerializer(serializers.ModelSerializer):
-    # Write-only field for item; we'll set it based on the sid
-    item_sid = serializers.CharField(write_only=True)
+    item_sid = serializers.CharField(source='item.sid', read_only=True)  # Ensure it is included in the response
 
     class Meta:
         model = Forecast
         fields = [
             'id', 'sid', 'clients', 'bfs', 'system_description',
-            'time_weeks', 'landscape', 'frontend',
-            'requester', 'parallel_processing',
-            'cw_request_plo', 'cw_delivered', 'comments',
-            'item_sid'  # The SID for the item
+            'time_weeks', 'landscape', 'frontend', 'assigned_to',
+            'requester', 'parallel_processing', 'cw_request_plo',
+            'cw_delivered', 'comments', 'item_sid'  # Include item_sid in the response fields
         ]
     
     def validate_item_sid(self, value):
-        # Ensure that an Item exists with the given sid
-        item = Item.objects.filter(sid=value).first()
-        if not item:
-            raise serializers.ValidationError(f"Item with SID '{value}' does not exist.")
-        return item
+        if value:  # Only validate if item_sid is provided
+            item = Item.objects.filter(sid=value).first()
+            if not item:
+                raise serializers.ValidationError(f"Item with SID '{value}' does not exist.")
+        return value
 
     def create(self, validated_data):
-        # Retrieve the item SID and find the corresponding item
-        item_sid = validated_data.pop('item_sid')
-        item = get_object_or_404(Item, sid=item_sid)
+        item_sid = validated_data.pop('item_sid', None)
+        if item_sid:
+            item = get_object_or_404(Item, sid=item_sid)
+            validated_data['item'] = item
+        assigned_to = validated_data.pop('assigned_to', None)
 
-        # Create and return the Forecast instance
-        forecast = Forecast.objects.create(item=item, **validated_data)
+        forecast = Forecast.objects.create(assigned_to=assigned_to, **validated_data)
         return forecast
 
     def update(self, instance, validated_data):
-        # Update fields with validated data
         instance.sid = validated_data.get('sid', instance.sid)
         instance.clients = validated_data.get('clients', instance.clients)
         instance.bfs = validated_data.get('bfs', instance.bfs)
@@ -107,12 +105,11 @@ class ForecastSerializer(serializers.ModelSerializer):
         instance.cw_delivered = validated_data.get('cw_delivered', instance.cw_delivered)
         instance.comments = validated_data.get('comments', instance.comments)
 
-        # If item_sid is provided, update the item
         if 'item_sid' in validated_data:
             item_sid = validated_data.pop('item_sid')
-            instance.item = get_object_or_404(Item, sid=item_sid)
+            item = get_object_or_404(Item, sid=item_sid)
+            instance.item = item
         
+        instance.assigned_to = validated_data.get('assigned_to', instance.assigned_to)
         instance.save()
         return instance
-
-

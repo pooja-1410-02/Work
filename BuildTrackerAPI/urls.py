@@ -18,6 +18,7 @@ from BuildTrackerApp.views import (
     UpdateUserStaffStatusView,
     send_email_notification,
     upload_excel,
+    upload_excel_forecast,
 )
 
 
@@ -43,4 +44,5 @@ urlpatterns = [
     path('update_staff_status/', UpdateUserStaffStatusView.as_view(), name='update-user-staff-status'),
     path('api/send-email/', send_email_notification, name='send_email'),
     path('upload-excel/', upload_excel, name='excel_upload'),
+    path('upload_excel_forecast/', upload_excel_forecast, name='upload_excel_forecast'),
 ]

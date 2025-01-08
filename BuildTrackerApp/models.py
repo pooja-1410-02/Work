@@ -60,7 +60,7 @@ class Item(models.Model):
 
     requested_date = models.DateField()
     flavour = models.CharField(max_length=30, choices=FLAVOUR_CHOICES)
-    sid = models.CharField(max_length=3)
+    sid = models.CharField(max_length=3,unique=True)
     estimated_clients = models.IntegerField()
     delivered_clients = models.IntegerField(null=True, blank=True)  # New field
     bfs = models.CharField(max_length=10, choices=BFS_CHOICES)
@@ -82,19 +82,35 @@ class Item(models.Model):
     comments = models.CharField(max_length=400,blank = True, null = True)
 
 class Forecast(models.Model):
+    COE = 'COE'
+    ODC = 'ODC'
+    TBD = 'TBD'
+
+    ASSIGNED_TO_CHOICES = [
+        (COE, 'COE'),
+        (ODC, 'ODC'),
+        (TBD, 'TBD'),
+    ]
+    
     def __str__(self):
         return f"{self.sid} - {self.clients} Clients"
 
-    item = models.ForeignKey(Item, on_delete=models.CASCADE, related_name='forecasts')
+    item = models.ForeignKey(Item, on_delete=models.CASCADE, related_name='forecasts', null=True, blank=True)  # Allow null/blank
     sid = models.CharField(max_length=3)
-    clients = models.IntegerField()
+    clients = models.IntegerField(default=0, null=True, blank=True)  # Allow null/blank
     bfs = models.CharField(max_length=10, choices=Item.BFS_CHOICES)
     system_description = models.CharField(max_length=300)
-    time_weeks = models.IntegerField()  # Time in weeks
+    time_weeks = models.IntegerField(null=True, blank=True)  # Allow null/blank
     landscape = models.CharField(max_length=300)
     frontend = models.CharField(max_length=100)
     requester = models.ForeignKey(PLO, on_delete=models.SET_NULL, null=True, related_name='forecast_requester')
-    parallel_processing = models.BooleanField(default=False)
-    cw_request_plo = models.IntegerField()
-    cw_delivered = models.IntegerField(null=True, blank=True)
+    parallel_processing = models.BooleanField(default=False, null=True, blank=True)  # Allow null/blank
+    cw_request_plo = models.IntegerField(null=True, blank=True)  # Allow null/blank
+    cw_delivered = models.IntegerField(null=True, blank=True)  # Allow null/blank
     comments = models.CharField(max_length=400, blank=True, null=True)
+    
+    assigned_to = models.CharField(
+        max_length=3,
+        choices=ASSIGNED_TO_CHOICES,
+        default=TBD,  # Default value set to TBD
+    )

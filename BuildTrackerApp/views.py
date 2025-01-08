@@ -263,9 +263,7 @@ class ItemViewSet(viewsets.ModelViewSet):
 
         return Response(serializer.data)
     
-class ForecastViewSet(viewsets.ModelViewSet):
-    serializer_class = ForecastSerializer
-    queryset = Forecast.objects.all()
+
 def parse_date(date_value):
     """Convert a date value to a Python date, handling NaT and errors."""
     if pd.notna(date_value):
@@ -352,6 +350,106 @@ def upload_excel(request):
                 comments=row.get('comments', ''),
             )
             item.save()
+
+        return Response({"message": "Excel data uploaded successfully."}, status=status.HTTP_201_CREATED)
+
+    except Exception as e:
+        logger.error(f"Error processing the file: {e}")
+        return Response({"error": "Failed to upload data."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+class ForecastViewSet(viewsets.ModelViewSet):
+    serializer_class = ForecastSerializer
+    queryset = Forecast.objects.all()
+
+    def update(self, request, *args, **kwargs):
+        partial = request.data.get('partial', False)  # Check if partial update
+        instance = self.get_object()  # Get the forecast instance
+
+        # Retrieve the serializer with the data and check for partial update
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+
+        # Validate the data
+        serializer.is_valid(raise_exception=True)
+
+        # If an 'item_sid' is present in the request data, validate and update the item
+        if 'item_sid' in request.data and request.data['item_sid']:  # Check if item_sid exists and is not blank
+            item_sid = request.data['item_sid']
+            try:
+                # Check if the item with the provided SID exists
+                item = Item.objects.get(sid=item_sid)
+                instance.item = item  # Update the item
+            except Item.DoesNotExist:
+                raise NotFound(f"Item with SID '{item_sid}' does not exist.")
+
+        # Perform the update
+        self.perform_update(serializer)
+
+        # Return the updated data in the response
+        return Response(serializer.data)
+
+@api_view(['POST'])
+def upload_excel_forecast(request):
+    if not request.FILES.get('file'):
+        logger.error("No file provided in the request.")
+        return Response({"error": "No file provided."}, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        # Retrieve the uploaded file and check its extension
+        excel_file = request.FILES['file']
+        file_extension = excel_file.name.split('.')[-1].lower()
+
+        if file_extension not in ['xlsx', 'xls']:
+            logger.error("Invalid file format: %s", file_extension)
+            return Response({"error": "Invalid file format. Please upload an .xls or .xlsx file."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Read the Excel file using pandas
+        df = pd.read_excel(excel_file, engine='openpyxl' if file_extension == 'xlsx' else 'xlrd')
+        logger.info(f"DataFrame contents: {df.head()}")
+
+        # Ensure item mappings are available
+        item_mapping = {item.sid: item.id for item in Item.objects.all()}
+
+        for index, row in df.iterrows():
+            # Check required fields
+            if not row.get('sid') or not row.get('assigned_to'):
+                logger.error("Missing required fields in row: %s", row)
+                return Response({"error": "Missing required fields."}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Retrieve the item based on sid
+            item_id = item_mapping.get(row['sid'])
+            if not item_id:
+                logger.error(f"Item with SID '{row['sid']}' not found.")
+                return Response({"error": f"Item with SID '{row['sid']}' not found."}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Parse and handle the calendar weeks
+            cw_request_plo = row.get('cw_request_plo', '').split(',') if row.get('cw_request_plo') else []
+            cw_delivered = row.get('cw_delivered', '').split(',') if row.get('cw_delivered') else []
+
+            # Create the forecast entry
+            forecast_data = {
+                'sid': row['sid'],
+                'item': Item.objects.get(id=item_id),
+                'clients': row.get('clients'),
+                'bfs': row['bfs'],
+                'system_description': row['system_description'],
+                'time_weeks': row.get('time_weeks'),
+                'landscape': row['landscape'],
+                'frontend': row['frontend'],
+                'assigned_to': row.get('assigned_to'),
+                'requester': row.get('requester', ''),
+                'parallel_processing': row.get('parallel_processing', False),
+                'cw_request_plo': cw_request_plo,  # List of calendar weeks
+                'cw_delivered': cw_delivered,      # List of calendar weeks
+                'comments': row.get('comments', ''),
+            }
+
+            # Create and save the Forecast object
+            forecast_serializer = ForecastSerializer(data=forecast_data)
+            if forecast_serializer.is_valid():
+                forecast_serializer.save()
+            else:
+                logger.error(f"Error saving forecast at row {index}: {forecast_serializer.errors}")
+                return Response({"error": "Error saving forecast data."}, status=status.HTTP_400_BAD_REQUEST)
 
         return Response({"message": "Excel data uploaded successfully."}, status=status.HTTP_201_CREATED)
 
