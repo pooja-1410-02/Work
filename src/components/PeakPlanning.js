@@ -2,32 +2,54 @@ import React, { useState, useEffect } from 'react';
 import './PeakPlanning.css';
 
 const PeakPlanning = () => {
-    const [currentHalf, setCurrentHalf] = useState(1); // First Half by default
+    const [currentHalf, setCurrentHalf] = useState(1);
     const [months, setMonths] = useState([]);
-    const [systems, setSystems] = useState([]); // Systems data
-    const [peakWeeks, setPeakWeeks] = useState([]); // Selected peak weeks
+    const [systems, setSystems] = useState([]);
+    const [peakWeeks, setPeakWeeks] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [selectedYear, setSelectedYear] = useState(2023); // Default year
+    const [selectedYear, setSelectedYear] = useState(2023);
+    const [events, setEvents] = useState({});
+    const [isEventFormOpen, setIsEventFormOpen] = useState(false);
+    const [newEvent, setNewEvent] = useState({ weeks: [], eventName: '' });
 
-    // Fetch systems data
     useEffect(() => {
         const fetchSystems = async () => {
             setLoading(true);
             try {
-                const response = await fetch('http://127.0.0.1:8000/api/api/item/');
-                const data = await response.json();
-                setSystems(data);
+                // Fetch forecast data
+                const forecastResponse = await fetch('http://127.0.0.1:8000/api/api/forecast');
+                const forecastData = await forecastResponse.json();
+            
+                // Fetch systems data
+                const systemsResponse = await fetch('http://127.0.0.1:8000/api/api/item/');
+                const systemsData = await systemsResponse.json();
+            
+                // Filter and map data to include system details
+                const filteredSystems = systemsData.filter(system =>
+                    forecastData.some(forecast => forecast.item_sid === system.sid)
+                );
+    
+                const systemsWithForecast = forecastData.map(forecast => {
+                    const matchingSystem = filteredSystems.find(system => system.sid === forecast.item_sid);
+                    return {
+                        ...forecast,
+                        systemDetails: matchingSystem // Include system details if found
+                    };
+                });
+    
+                setSystems(systemsWithForecast);
+    
             } catch (error) {
-                setError('Error fetching systems');
-                console.error('Error fetching systems:', error);
+                setError('Error fetching systems or forecast data');
+                console.error('Error fetching systems or forecast data:', error);
             } finally {
                 setLoading(false);
             }
         };
-
+    
         fetchSystems();
-    }, [selectedYear]);
+    }, [selectedYear]);       
 
     // Update months when the current half changes
     useEffect(() => {
@@ -53,28 +75,39 @@ const PeakPlanning = () => {
         localStorage.setItem(`peakWeeks_${selectedYear}`, JSON.stringify(selected));
     };
 
-    const renderHeader = () => (
-        <tr>
-            {months.map((month, index) => (
-                <th key={index} colSpan="4">{month}</th>
-            ))}
-        </tr>
-    );
+    // Handle adding new event
+    const handleAddEvent = () => {
+        if (newEvent.weeks.length > 0 && newEvent.eventName) {
+            newEvent.weeks.forEach(week => {
+                setEvents(prevEvents => ({
+                    ...prevEvents,
+                    [week]: newEvent.eventName,
+                }));
+            });
+
+            setIsEventFormOpen(false); 
+            setNewEvent({ weeks: [], eventName: '' }); 
+        }
+    };
 
     const renderWeeksHeader = () => {
         const weekHeaders = [];
         const startWeek = currentHalf === 1 ? 1 : 27;
-
+    
+        // Add extra header for SID column on the left
+        weekHeaders.push(<th key="sid-header">SID</th>);
+    
         for (let weekIndex = 0; weekIndex < 26; weekIndex++) {
             const weekNumber = startWeek + weekIndex;
             weekHeaders.push(
                 <th key={`cw-${weekNumber}`}>CW{weekNumber.toString().padStart(2, '0')}</th>
             );
         }
-
+    
         return <tr>{weekHeaders}</tr>;
-    };
+    };    
 
+    // Render the peak weeks row
     const renderPeakWeeksRow = () => {
         const peakRowCells = [];
         const startWeek = currentHalf === 1 ? 1 : 27;
@@ -96,55 +129,70 @@ const PeakPlanning = () => {
         return <tr>{peakRowCells}</tr>;
     };
 
+    // Render the event row showing events for each CW
+    const renderEventRow = () => {
+        const eventRowCells = [];
+        const startWeek = currentHalf === 1 ? 1 : 27;
+
+        for (let weekIndex = 0; weekIndex < 26; weekIndex++) {
+            const weekNumber = startWeek + weekIndex;
+
+            const event = events[weekNumber];
+            eventRowCells.push(
+                <td key={`event-${weekNumber}`} className="event">
+                    {event ? event : ''}
+                </td>
+            );
+        }
+
+        return <tr>{eventRowCells}</tr>;
+    };
+
     const renderRows = () => {
         const renderedSids = new Set();
-        const filteredSystems = systems.filter(system => {
-            const reqDate = new Date(system.requested_date);
-            const systemYear = reqDate.getFullYear();
+        
+        return systems.map((forecast, index) => {
+            const sid = forecast.sid;
+            const system = forecast.systemDetails;
     
-            // Check if the system's year matches the selected year
-            if (systemYear !== selectedYear || system.flavour !== "S/4H OP") {
-                return false;
+            // Ensure systemDetails exists before accessing requested_date
+            if (!system) {
+                return null; // If no system details are found, skip rendering this row
             }
     
-            // Now check for the first or second half of the year based on the requested CW (calendar week)
-            const startCW = getCWFromDate(system.requested_date);
-            const endCW = getCWFromDate(system.delivery_date);
-            if (currentHalf === 1) {
-                return startCW <= 26 && endCW <= 26; // Only allow systems that fall within the first half
-            } else {
-                return startCW >= 27 && endCW >= 27; // Only allow systems that fall within the second half
-            }
-        });
-    
-        return filteredSystems.map((system, index) => {
-            const sid = system.sid;
-    
-            if (renderedSids.has(sid)) return null;
-            renderedSids.add(sid);
-    
+            // Calculate start and end weeks for the system
             const { startCW, endCW } = getMonthAndCW(system.requested_date, system.delivery_date);
+    
+            // Prepare to render cells for weeks
             const rowCells = [];
             let count = 0;
     
-            const startWeek = currentHalf === 1 ? 1 : 27; // Start at CW1 for first half, CW27 for second half
-            const endWeek = currentHalf === 1 ? 26 : 52; // End at CW26 for first half, CW52 for second half
+            const startWeek = currentHalf === 1 ? 1 : 27;
+            const endWeek = currentHalf === 1 ? 26 : 52;
     
-            // Loop through the weeks and create row cells
+            // Render the forecast sid to the left of CWs
+            rowCells.push(
+                <td key={`sid-${sid}`} rowSpan={1} className="sid-cell" title={`SID: ${sid}`}>
+                    {sid}
+                </td>
+            );
+    
+            // Loop over the weeks, checking if they fall within the system's requested delivery window
             for (let weekIndex = 0; weekIndex < 26; weekIndex++) {
                 const weekNumber = startWeek + weekIndex;
-                const isInRange = startCW <= weekNumber && weekNumber <= endCW && weekNumber >= startWeek && weekNumber <= endWeek;
+                const isInRange = startCW <= weekNumber && weekNumber <= endCW;
     
                 if (isInRange) {
-                    count++;
+                    count++; // Continue counting weeks in the range
                 } else {
+                    // Render the row cell when the range ends
                     if (count > 0) {
                         rowCells.push(
-                            <td key={`sid-${sid}-week-${weekIndex}`} colSpan={count} className="sid-cell" title={`SID: ${sid}`} >
+                            <td key={`sid-${sid}-week-${weekIndex}`} colSpan={count} className="sid-cell" title={`SID: ${sid}`}>
                                 {sid}
                             </td>
                         );
-                        count = 0;
+                        count = 0; // Reset the count for the next group of weeks
                     } else {
                         rowCells.push(
                             <td key={`empty-${weekIndex}`} className="empty-cell" />
@@ -153,21 +201,24 @@ const PeakPlanning = () => {
                 }
             }
     
+            // If there's any remaining count, render it
             if (count > 0) {
                 rowCells.push(
-                    <td key={`sid-${sid}-last`} colSpan={count} className="sid-cell" title={`SID: ${sid}`} >
+                    <td key={`sid-${sid}-last`} colSpan={count} className="sid-cell" title={`SID: ${sid}`}>
                         {sid}
                     </td>
                 );
             }
     
+            // Only render the row if there are cells to display
             return rowCells.length > 0 ? (
                 <tr key={`row-${sid}-${index}`}>
                     {rowCells}
                 </tr>
             ) : null;
         });
-    };
+    };    
+    
 
     const getCWFromDate = (date) => {
         const startOfYear = new Date(new Date(date).getFullYear(), 0, 1);
@@ -185,7 +236,6 @@ const PeakPlanning = () => {
         <div className="peak-planning-container">
             <h2>Planning {selectedYear}</h2>
 
-            {/* Filter Button for Year */}
             <div className="year-filter-container">
                 <label htmlFor="year-select">Select Year:</label>
                 <select
@@ -198,21 +248,19 @@ const PeakPlanning = () => {
                 </select>
             </div>
 
-            {/* Half Year Selection */}
             <div className="button-container">
                 <button onClick={() => setCurrentHalf(1)}>First Half</button>
                 <button onClick={() => setCurrentHalf(2)}>Second Half</button>
             </div>
 
-            {/* Manual Mode for Peak Week Selection */}
-            <div className="manual-peak-selection">
+            <div className="peak-week-selection">
                 <label>Select Peak Weeks:</label>
                 <select
                     multiple
                     value={peakWeeks}
                     onChange={(e) => handleManualPeakSelection(Array.from(e.target.selectedOptions, option => parseInt(option.value)))}
                 >
-                    {Array.from({ length: 26 }, (_, index) => index + 1).map(week => (
+                    {Array.from({ length: 26 }, (_, index) => index + 1).map((week) => (
                         <option key={week} value={week}>
                             CW{week.toString().padStart(2, '0')}
                         </option>
@@ -220,15 +268,44 @@ const PeakPlanning = () => {
                 </select>
             </div>
 
+            <button onClick={() => setIsEventFormOpen(true)}>Add Event</button>
+
+            {isEventFormOpen && (
+                <div className="event-form">
+                    <label>Enter Event for Selected CWs:</label>
+                    <select
+                        multiple
+                        value={newEvent.weeks}
+                        onChange={(e) => setNewEvent({ ...newEvent, weeks: Array.from(e.target.selectedOptions, option => parseInt(option.value)) })}
+                    >
+                        {Array.from({ length: 26 }, (_, index) => index + 1).map((week) => (
+                            <option key={week} value={week}>
+                                CW{week.toString().padStart(2, '0')}
+                            </option>
+                        ))}
+                    </select>
+
+                    <label>Event Name:</label>
+                    <input
+                        type="text"
+                        value={newEvent.eventName}
+                        onChange={(e) => setNewEvent({ ...newEvent, eventName: e.target.value })}
+                    />
+
+                    <button onClick={handleAddEvent}>Add Event</button>
+                    <button onClick={() => setIsEventFormOpen(false)}>Cancel</button>
+                </div>
+            )}
+
             {loading && <p>Loading...</p>}
             {error && <p style={{ color: 'red' }}>{error}</p>}
 
             <h3>{selectedYear}</h3>
             <table>
                 <thead>
-                    {renderHeader()}
                     {renderWeeksHeader()}
                     {renderPeakWeeksRow()}
+                    {renderEventRow()}
                 </thead>
                 <tbody>
                     {renderRows()}

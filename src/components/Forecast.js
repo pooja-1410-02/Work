@@ -53,35 +53,48 @@ const Forecast = ({ username, userDetails }) => {
         setShowForm(false);
     };
 
-    const handleFormSave = async (forecastToSave) => {
+    const handleFormSave = async (forecastToSave) => {        
+        // Set loading state
         setLoading(true);
         try {
+            // Define required fields that must not be null or undefined
             const requiredFields = [
-                'sid', 'clients', 'bfs', 'system_description',
-                'time_weeks', 'landscape', 'frontend', 
-                'requester', 'cw_request_plo', 'item_sid'
+                'sid', 'bfs', 'system_description',
+                'landscape', 'frontend', 'requester'
             ];
-            const missingFields = requiredFields.filter(field => !forecastToSave[field]);
-
+    
+            // Modified check to allow certain fields (e.g., clients, cw_request_plo) to be empty or null
+            const missingFields = requiredFields.filter(field => forecastToSave[field] === undefined || forecastToSave[field] === null);
+    
             if (missingFields.length > 0) {
                 throw new Error(`Missing required fields: ${missingFields.join(', ')}`);
             }
-
+    
             let response;
             if (formMode === 'add') {
                 response = await axios.post('http://localhost:8000/api/api/forecast/', forecastToSave);
                 setForecasts(prev => [...prev, response.data]);
-            } else if (formMode === 'edit') {
+            } 
+            if (formMode === 'edit') {
                 response = await axios.put(`http://localhost:8000/api/api/forecast/${forecastToSave.id}/`, forecastToSave);
-                setForecasts(prev => prev.map(forecast => (forecast.id === response.data.id ? response.data : forecast)));
+                setForecasts(prev => prev.map(forecast =>
+                    forecast.id === response.data.id ? response.data : forecast
+                ));
             }
             handleFormClose();
         } catch (error) {
-            setError(error.response ? `Failed to save forecast: ${error.response.data.detail || error.response.data}` : 'Failed to save forecast.');
-        } finally {
+            console.error('Error saving forecast:', error);
+            if (error.response) {
+                console.error('Response data:', error.response.data);
+                setError(`Failed to save forecast: ${error.response.data.detail || error.response.data}`);
+            } else {
+                setError('Failed to save forecast.');
+            }
+        }
+         finally {
             setLoading(false);
         }
-    };
+    };         
 
     const handleDelete = async (id) => {
         setLoading(true);
@@ -114,6 +127,7 @@ const Forecast = ({ username, userDetails }) => {
                     <th>Time (weeks)</th>
                     <th>Landscape</th>
                     <th>Frontend</th>
+                    <th>Assigned To</th>
                     <th>Requester</th>
                     <th>Parallel Processing</th>
                     <th>CW Request PLO</th>
@@ -125,6 +139,61 @@ const Forecast = ({ username, userDetails }) => {
             {isAdmin && <th>Actions</th>}
         </>
     );
+
+    const renderForecastRows = () => {
+        return forecasts.map(forecast => {
+            const correspondingItem = items.find(item => item.id === forecast.item_id);
+            const requesterPlo = plos.find(plo => plo.id === forecast.requester);
+            const requesterName = requesterPlo ? requesterPlo.name : 'Unknown';
+
+            return (
+                <tr key={forecast.id}>
+                    <td onClick={() => toggleExpand(forecast.id)} style={{ cursor: 'pointer' }}>
+                        {forecast.sid}
+                        <span style={{ marginLeft: '8px' }}>
+                            {expandedForecasts.has(forecast.id) ? '▼' : '►'}
+                        </span>
+                    </td>
+                    {expandedForecasts.has(forecast.id) && (
+                        <>
+                            <td>{forecast.clients}</td>
+                            <td>{forecast.bfs}</td>
+                            <td>{forecast.system_description}</td>
+                            <td>{forecast.time_weeks}</td>
+                            <td>{forecast.landscape}</td>
+                            <td>{forecast.frontend}</td>
+                            <td>{forecast.assigned_to}</td>
+                            <td>{requesterName}</td>
+                            <td>{forecast.parallel_processing ? 'Yes' : 'No'}</td>
+                            <td>{forecast.cw_request_plo}</td>
+                            <td>{forecast.cw_delivered}</td>
+                            <td>{forecast.comments}</td>
+                            <td>{forecast.item_sid}</td>
+                        </>
+                    )}
+                    {isAdmin && (
+                        <td>
+                            <button
+                                onClick={() => handleEdit(forecast)}
+                                disabled={loading}
+                                aria-label="Edit Forecast"
+                            >
+                                Edit
+                            </button>
+                            <button
+                                className="delete"
+                                onClick={() => handleDelete(forecast.id)}
+                                disabled={loading}
+                                aria-label="Delete Forecast"
+                            >
+                                Delete
+                            </button>
+                        </td>
+                    )}
+                </tr>
+            );
+        });
+    };
 
     return (
         <div className="forecast">
@@ -155,52 +224,7 @@ const Forecast = ({ username, userDetails }) => {
                             <td colSpan={isAdmin ? 14 : 13}>No forecasts available.</td>
                         </tr>
                     ) : (
-                        forecasts.map(forecast => {
-                            const correspondingItem = items.find(item => item.id === forecast.item_id);
-                            return (
-                                <React.Fragment key={forecast.id}>
-                                    <tr>
-                                        <td onClick={() => toggleExpand(forecast.id)} style={{ cursor: 'pointer' }}>
-                                            {forecast.sid}
-                                            <span style={{ marginLeft: '8px' }}>
-                                                {expandedForecasts.has(forecast.id) ? '▼' : '►'}
-                                            </span>
-                                        </td>
-                                        {expandedForecasts.has(forecast.id) && (
-                                            <>
-                                                <td>{forecast.clients}</td>
-                                                <td>{forecast.bfs}</td>
-                                                <td>{forecast.system_description}</td>
-                                                <td>{forecast.time_weeks}</td>
-                                                <td>{forecast.landscape}</td>
-                                                <td>{forecast.frontend}</td>
-                                                <td>{forecast.requester_name}</td>
-                                                <td>{forecast.parallel_processing ? 'Yes' : 'No'}</td>
-                                                <td>{forecast.cw_request_plo}</td>
-                                                <td>{forecast.cw_delivered}</td>
-                                                <td>{forecast.comments}</td>
-                                                <td>{correspondingItem ? correspondingItem.sid : 'N/A'}</td>
-                                            </>
-                                        )}
-                                        {isAdmin && (
-                                            <td>
-                                                <button onClick={() => handleEdit(forecast)} disabled={loading} aria-label="Edit Forecast">
-                                                    Edit
-                                                </button>
-                                                <button
-                                                    className="delete"
-                                                    onClick={() => handleDelete(forecast.id)}
-                                                    disabled={loading}
-                                                    aria-label="Delete Forecast"
-                                                >
-                                                    Delete
-                                                </button>
-                                            </td>
-                                        )}
-                                    </tr>
-                                </React.Fragment>
-                            );
-                        })
+                        renderForecastRows()
                     )}
                 </tbody>
             </table>

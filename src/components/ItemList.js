@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import ItemListForm from './ItemListForm'; // Ensure this path is correct
 import './ItemList.css';
+import * as XLSX from 'xlsx'; // Import xlsx library
 
 const ItemList = ({ username, userDetails }) => {
     const [items, setItems] = useState([]);
@@ -133,20 +134,6 @@ const ItemList = ({ username, userDetails }) => {
             }
 
             handleFormClose(); // Close the form after saving
-            
-            // Check if the status has changed
-            if (editingItem && response.data.status !== editingItem.status) {
-                try {
-                    const emailResponse = await axios.post('http://localhost:8000/api/api/send-email/', {
-                        sid: response.data.sid,
-                        status: response.data.status,
-                        itemDetails: response.data
-                    });
-                    console.log('Email sent response:', emailResponse.data);
-                } catch (emailError) {
-                    console.error('Error sending email:', emailError.response ? emailError.response.data : emailError.message);
-                }
-            }
         } catch (error) {
             console.error('Error saving item:', error.response ? error.response.data : error.message);
             setError('Failed to save item.');
@@ -165,6 +152,39 @@ const ItemList = ({ username, userDetails }) => {
         } finally {
             setLoading(false);
         }
+    };
+
+    // Function to export filtered data to Excel
+    const exportToExcel = () => {
+        const wsData = filteredItems.map(item => ({
+            'Requested Date': item.requested_date,
+            'Flavour': item.flavour,
+            'SID': item.sid,
+            'Estimated Clients': item.estimated_clients,
+            'Delivered Clients': item.delivered_clients,
+            'BFS': item.bfs,
+            'T-Shirt Size': item.t_shirt_size,
+            'System Type': item.system_type,
+            'Hardware': item.hardware,
+            'Setup': item.setup,
+            'PLO': getPloNameById(item.plo),
+            'Processor1': getProcessorNameById(item.processor1),
+            'Processor2': getProcessorNameById(item.processor2),
+            'Status': item.status,
+            'Landscape': item.landscape,
+            'Description': item.description,
+            'Expected Delivery': item.expected_delivery,
+            'Revised Delivery Date': item.revised_delivery_date,
+            'Delivery Date': item.delivery_date,
+            'Delivery Delay Reason': item.delivery_delay_reason,
+            'ServiceNow': item.servicenow,
+            'Comments': item.comments
+        }));
+
+        const ws = XLSX.utils.json_to_sheet(wsData);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'Items');
+        XLSX.writeFile(wb, 'filtered_items.xlsx');
     };
 
     return (
@@ -206,6 +226,7 @@ const ItemList = ({ username, userDetails }) => {
             {isAdmin && (
                 <button onClick={handleAddNew} disabled={loading}>Add Item</button>
             )}
+            <button onClick={exportToExcel} disabled={loading}>Download as Excel</button>
             {loading && <p>Loading...</p>}
             {showForm && (
                 <ItemListForm
