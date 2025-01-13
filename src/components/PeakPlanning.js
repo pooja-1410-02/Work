@@ -5,6 +5,7 @@ const PeakPlanning = () => {
     const [currentHalf, setCurrentHalf] = useState(1);
     const [months, setMonths] = useState([]);
     const [systems, setSystems] = useState([]);
+    const [forecastData, setForecastData] = useState([]);  // Store the forecast data
     const [peakWeeks, setPeakWeeks] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -13,33 +14,22 @@ const PeakPlanning = () => {
     const [isEventFormOpen, setIsEventFormOpen] = useState(false);
     const [newEvent, setNewEvent] = useState({ weeks: [], eventName: '' });
 
+    // Fetch forecast and system data
     useEffect(() => {
-        const fetchSystems = async () => {
+        const fetchForecastAndSystems = async () => {
             setLoading(true);
             try {
                 // Fetch forecast data
                 const forecastResponse = await fetch('http://127.0.0.1:8000/api/api/forecast');
                 const forecastData = await forecastResponse.json();
-            
-                // Fetch systems data
+                setForecastData(forecastData);  // Save forecast data to state
+
+                // Fetch system data
                 const systemsResponse = await fetch('http://127.0.0.1:8000/api/api/item/');
                 const systemsData = await systemsResponse.json();
-            
-                // Filter and map data to include system details
-                const filteredSystems = systemsData.filter(system =>
-                    forecastData.some(forecast => forecast.item_sid === system.sid)
-                );
-    
-                const systemsWithForecast = forecastData.map(forecast => {
-                    const matchingSystem = filteredSystems.find(system => system.sid === forecast.item_sid);
-                    return {
-                        ...forecast,
-                        systemDetails: matchingSystem // Include system details if found
-                    };
-                });
-    
-                setSystems(systemsWithForecast);
-    
+                
+                setSystems(systemsData);  // Save systems data to state
+                
             } catch (error) {
                 setError('Error fetching systems or forecast data');
                 console.error('Error fetching systems or forecast data:', error);
@@ -47,9 +37,9 @@ const PeakPlanning = () => {
                 setLoading(false);
             }
         };
-    
-        fetchSystems();
-    }, [selectedYear]);       
+        
+        fetchForecastAndSystems();
+    }, [selectedYear]); 
 
     // Update months when the current half changes
     useEffect(() => {
@@ -90,22 +80,20 @@ const PeakPlanning = () => {
         }
     };
 
+    // Render the header with CWs
     const renderWeeksHeader = () => {
         const weekHeaders = [];
         const startWeek = currentHalf === 1 ? 1 : 27;
-    
-        // Add extra header for SID column on the left
-        weekHeaders.push(<th key="sid-header">SID</th>);
-    
+
         for (let weekIndex = 0; weekIndex < 26; weekIndex++) {
             const weekNumber = startWeek + weekIndex;
             weekHeaders.push(
                 <th key={`cw-${weekNumber}`}>CW{weekNumber.toString().padStart(2, '0')}</th>
             );
         }
-    
+
         return <tr>{weekHeaders}</tr>;
-    };    
+    };
 
     // Render the peak weeks row
     const renderPeakWeeksRow = () => {
@@ -151,48 +139,59 @@ const PeakPlanning = () => {
     const renderRows = () => {
         const renderedSids = new Set();
         
-        return systems.map((forecast, index) => {
-            const sid = forecast.sid;
-            const system = forecast.systemDetails;
+        return forecastData.map((forecast, index) => {
+            const forecastSid = forecast.sid;  // SID from forecast data
     
-            // Ensure systemDetails exists before accessing requested_date
-            if (!system) {
-                return null; // If no system details are found, skip rendering this row
-            }
+            // Ensure the SID has not been rendered already
+            if (renderedSids.has(forecastSid)) return null;
+            renderedSids.add(forecastSid);
     
-            // Calculate start and end weeks for the system
-            const { startCW, endCW } = getMonthAndCW(system.requested_date, system.delivery_date);
+            // Find the corresponding system data where system.sid matches forecast.item_sid
+            const systemMatch = systems.find(system => system.sid === forecast.item_sid);
     
-            // Prepare to render cells for weeks
+            // If there's no matching system, skip this row
+            if (!systemMatch) return null;
+    
+            const systemRequestedYear = new Date(systemMatch.requested_date).getFullYear();
+    
+            const yearForPeakPlanning = [2023, 2025].includes(selectedYear)
+                ? (systemRequestedYear >= 2023 && systemRequestedYear <= 2024) ? 2025 : 2023
+                : (systemRequestedYear >= 2021 && systemRequestedYear <= 2022) ? 2023 : 2025;
+
+    
+            // Skip the system if it doesn't belong to the current peak planning year
+            // Only show the row if the yearForPeakPlanning matches the selectedYear
+            if (yearForPeakPlanning !== selectedYear) return null;
+    
+            const { startCW, endCW } = getMonthAndCW(systemMatch.requested_date, systemMatch.delivery_date);
+    
             const rowCells = [];
             let count = 0;
-    
             const startWeek = currentHalf === 1 ? 1 : 27;
-            const endWeek = currentHalf === 1 ? 26 : 52;
     
-            // Render the forecast sid to the left of CWs
+            // Add the forecast SID to the SID column
             rowCells.push(
-                <td key={`sid-${sid}`} rowSpan={1} className="sid-cell" title={`SID: ${sid}`}>
-                    {sid}
+                <td key={`sid-${forecastSid}`} className="sid-cell">
+                    {forecastSid}
                 </td>
             );
     
-            // Loop over the weeks, checking if they fall within the system's requested delivery window
+            // Loop through weeks (26 weeks for first or second half)
             for (let weekIndex = 0; weekIndex < 26; weekIndex++) {
                 const weekNumber = startWeek + weekIndex;
                 const isInRange = startCW <= weekNumber && weekNumber <= endCW;
     
+                // If the week is in range for the system, show the system SID
                 if (isInRange) {
-                    count++; // Continue counting weeks in the range
+                    count++;
                 } else {
-                    // Render the row cell when the range ends
                     if (count > 0) {
                         rowCells.push(
-                            <td key={`sid-${sid}-week-${weekIndex}`} colSpan={count} className="sid-cell" title={`SID: ${sid}`}>
-                                {sid}
+                            <td key={`sid-${forecastSid}-week-${weekIndex}`} colSpan={count} className="sid-cell" title={`System SID: ${systemMatch.sid}`} >
+                                {systemMatch.sid}
                             </td>
                         );
-                        count = 0; // Reset the count for the next group of weeks
+                        count = 0;
                     } else {
                         rowCells.push(
                             <td key={`empty-${weekIndex}`} className="empty-cell" />
@@ -201,25 +200,22 @@ const PeakPlanning = () => {
                 }
             }
     
-            // If there's any remaining count, render it
             if (count > 0) {
                 rowCells.push(
-                    <td key={`sid-${sid}-last`} colSpan={count} className="sid-cell" title={`SID: ${sid}`}>
-                        {sid}
+                    <td key={`sid-${forecastSid}-last`} colSpan={count} className="sid-cell" title={`System SID: ${systemMatch.sid}`} >
+                        {systemMatch.sid}
                     </td>
                 );
             }
     
-            // Only render the row if there are cells to display
+            // Only return this row if yearForPeakPlanning matches selectedYear
             return rowCells.length > 0 ? (
-                <tr key={`row-${sid}-${index}`}>
+                <tr key={`row-${forecastSid}-${index}`}>
                     {rowCells}
                 </tr>
             ) : null;
         });
-    };    
-    
-
+    };           
     const getCWFromDate = (date) => {
         const startOfYear = new Date(new Date(date).getFullYear(), 0, 1);
         const days = Math.floor((new Date(date) - startOfYear) / (24 * 60 * 60 * 1000));
